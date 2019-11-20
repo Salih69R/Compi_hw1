@@ -60,7 +60,7 @@ void findFirst(char* line){
 
 void HandleError(){
 
-    char line[1030];//iniated a little bigger
+    char line[1030];//iniated a little bigger than 1024
     int index=0;
     int token=0;
 
@@ -109,6 +109,15 @@ void HandleError(){
     }
 }
 
+
+
+
+
+
+
+
+
+//this functions validates the tens and ones (combined) are between 00 and up until 7f returns the char needed to be rinted
 char HexaMangment(char tens,char ones){
 
     int one;
@@ -182,6 +191,23 @@ void PrintString(char* string){
 
 }
 
+
+
+
+//goes over the yytext, checks validity of every \x ES
+void checkValidAsci() {
+
+	int i = 0;
+	for (i = 0; i < yyleng; ++i) {
+		if (yyleng - i < 5)//if there is anymore valid \x escape sequences structure, the lexeer would've returned token = -1, and this means there isn't any unvalid \x SE
+			return;
+		if (yytext[i] == '\\' && yytext[i + 1] == 'x') {
+			HexaMangment(yytext[i + 2], yytext[i + 3]);//if there was an invalid ES it prints the error and exits
+		}
+	}
+}
+
+
 int main()
 {
     int token;
@@ -247,6 +273,7 @@ int main()
         } if (token == NUM){
             std::cout << yylineno << " NUM " << yytext << std::endl;
         } if (token == STRING){
+			checkValidAsci();//this does exit(0) if it found a bad asci value in an \x escape sequence, all types of errors are handeled when the token is -1
             std::cout << yylineno << " STRING ";
             PrintString(yytext);
             std::cout<<std::endl;
